@@ -17,17 +17,12 @@ jobs:
           jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
             xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -o "$PR_DATA" --url
 
-          GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
           HEAD_REF=$(jq -r ".head.ref" "$PR_DATA")
-          HEAD_CLONE_URL=$(jq -r '.head.repo.clone_url | sub("https://"; "https://x-access-token:\(env.GITHUB_TOKEN)@")' "$PR_DATA")
+          HEAD_REPO=$(jq -r ".head.repo.full_name" "$PR_DATA")
 
-          # Setup the git user (required to commit anything)
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          # jq -r '.head.repo.clone_url | sub("https://"; env.GITHUB_TOKEN)' pr.json
 
-          echo $HEAD_CLONE_URL
-
-          git clone $HEAD_CLONE_URL .
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$HEAD_REPO.git .
           git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
       - name: "Install .NET core"
