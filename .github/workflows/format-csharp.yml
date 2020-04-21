@@ -31,8 +31,7 @@ jobs:
           HEAD_REF=$(jq -r ".head.ref" "$PR_DATA")
           HEAD_CLONE_URL=$(jq -r ".head.repo.clone_url" "$PR_DATA")
 
-          # git clone "$HEAD_CLONE_URL"
-          git clone https://github.com/ErikSchierboomTest/v3.git
+          git clone "$HEAD_CLONE_URL" .
           git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
       # - name: "Format C# code"
