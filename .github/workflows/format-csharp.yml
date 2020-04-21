@@ -43,6 +43,8 @@ jobs:
 
       - name: "Commit formatted C# code"
         run: |
+          touch test3.txt
+
           # Check if there is nothing to commit (i.e. no formatting changes made)
           if [ -z "$(git status --porcelain)" ]; then 
             echo "Code is already formatted correctly"
