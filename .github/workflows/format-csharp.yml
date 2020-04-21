@@ -23,6 +23,9 @@ jobs:
 
       - name: "Checkout PR"
         run: |
+          printenv
+          cat "$GITHUB_EVENT_PATH" 
+
           HEAD_REF=$( \
             jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
             xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
