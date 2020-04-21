@@ -39,7 +39,7 @@ jobs:
           git remote -v
           git branch -vv
 
-          git checkout -b "$HEAD_REF" "origin/${HEAD_REF}"
+          git checkout -b "$HEAD_REF" "origin/pull/${NUMBER}/head"
       # - name: "Format C# code"
       #   run: |
       #     # Use dotnet format to format the added or modified C# files in the PR (if any)
