@@ -11,7 +11,17 @@ jobs:
     if: github.event.issue.pull_request != '' && (contains(github.event.comment.body, '/format-csharp') || contains(github.event.comment.body, '/dotnet-format'))
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v2
+        run: |
+          PR_DATA="/tmp/pr.json"
+
+          jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
+            xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -o "$PR_DATA" --url
+
+          HEAD_REF=$(jq -r ".head.ref" "$PR_DATA")
+          HEAD_REPO=$(jq -r '.head.repo.clone_url | sub("https://"; "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@")' "$PR_DATA")
+
+          git clone $HEAD_REPO .
+          git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
       - name: "Install .NET core"
         uses: actions/setup-dotnet@v1
@@ -20,17 +30,6 @@ jobs:
 
       - name: "Install dotnet format tool"
         run: dotnet tool install -g dotnet-format
-
-      - name: "Checkout PR"
-        run: |
-          HEAD_REF=$( \
-            jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
-            xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
-            jq -r ".head.ref")
-
-          # Checkout the PR branch, as issue workflows have the repo's default branch checked out
-          git fetch origin "$HEAD_REF"
-          git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
       - name: "Format C# code"
         run: |
@@ -44,7 +43,7 @@ jobs:
       - name: "Commit formatted C# code"
         run: |
           # Check if there is nothing to commit (i.e. no formatting changes made)
-          if [ -z "$(git status --porcelain)" ]; then 
+          if [ -z "$(git status --porcelain)" ]; then
             echo "Code is already formatted correctly"
             exit 0
           fi
