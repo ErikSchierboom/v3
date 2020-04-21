@@ -47,7 +47,7 @@ jobs:
       #       xargs dotnet format -f . --files
       - name: "Commit formatted C# code"
         run: |
-          touch test.txt
+          touch test2.txt
 
           # Check if there is nothing to commit (i.e. no formatting changes made)
           if [ -z "$(git status --porcelain)" ]; then
