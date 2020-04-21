@@ -23,8 +23,9 @@ jobs:
 
       - name: "Checkout PR"
         run: |
-          printenv
-          cat "$GITHUB_EVENT_PATH" 
+          cat "$GITHUB_EVENT_PATH"
+          git remote -v
+          git branch -vv
 
           HEAD_REF=$( \
             jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
