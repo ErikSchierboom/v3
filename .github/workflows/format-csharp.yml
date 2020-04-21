@@ -17,7 +17,7 @@ jobs:
           PR_DATA="/tmp/pr.json"
 
           jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
-            xargs curl --header 'authorization: Bearer "$GITHUB_TOKEN"' -o "$PR_DATA" --url
+            xargs curl --header 'authorization: Bearer $GITHUB_TOKEN' -o "$PR_DATA" --url
 
           HEAD_REF=$(jq -r ".head.ref" "$PR_DATA")
           HEAD_REPO=$(jq -r '.head.repo.clone_url | sub("https://"; "https://x-access-token:\(env.GITHUB_TOKEN)@")' "$PR_DATA")
