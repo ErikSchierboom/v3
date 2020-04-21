@@ -9,10 +9,10 @@ jobs:
     name: "Format C# code"
     runs-on: ubuntu-latest
     if: github.event.issue.pull_request != '' && (contains(github.event.comment.body, '/format-csharp') || contains(github.event.comment.body, '/dotnet-format'))
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_DATA="/tmp/pr.json"
 
