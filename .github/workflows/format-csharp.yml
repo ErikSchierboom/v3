@@ -25,6 +25,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
+          echo $HEAD_CLONE_URL
+
           git clone $HEAD_CLONE_URL .
           git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
