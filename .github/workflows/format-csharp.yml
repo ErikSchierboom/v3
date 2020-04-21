@@ -25,25 +25,27 @@ jobs:
           git clone $HEAD_REPO .
           git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
 
-      - name: "Install .NET core"
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "3.1.201"
+      # - name: "Install .NET core"
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: "3.1.201"
 
-      - name: "Install dotnet format tool"
-        run: dotnet tool install -g dotnet-format
+      # - name: "Install dotnet format tool"
+      #   run: dotnet tool install -g dotnet-format
 
-      - name: "Format C# code"
-        run: |
-          # Use dotnet format to format the added or modified C# files in the PR (if any)
-          jq -r '.issue.pull_request.url | . += "/files"' "$GITHUB_EVENT_PATH" | \
-            xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
-            jq -r -c '.[] | select(.status == "added" or .status == "modified") | select(.filename | match(".cs$")) | .filename' | \
-            paste -s -d, - | \
-            xargs dotnet format -f . --files
+      # - name: "Format C# code"
+      #   run: |
+      #     # Use dotnet format to format the added or modified C# files in the PR (if any)
+      #     jq -r '.issue.pull_request.url | . += "/files"' "$GITHUB_EVENT_PATH" | \
+      #       xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
+      #       jq -r -c '.[] | select(.status == "added" or .status == "modified") | select(.filename | match(".cs$")) | .filename' | \
+      #       paste -s -d, - | \
+      #       xargs dotnet format -f . --files
 
       - name: "Commit formatted C# code"
         run: |
+          touch test8.txt
+
           # Check if there is nothing to commit (i.e. no formatting changes made)
           if [ -z "$(git status --porcelain)" ]; then
             echo "Code is already formatted correctly"
