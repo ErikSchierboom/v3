@@ -47,17 +47,19 @@ jobs:
       #       jq -r -c '.[] | select(.status == "added" or .status == "modified") | select(.filename | match(".cs$")) | .filename' | \
       #       paste -s -d, - | \
       #       xargs dotnet format -f . --files
-      # - name: "Commit formatted C# code"
-      #   run: |
-      #     # Check if there is nothing to commit (i.e. no formatting changes made)
-      #     if [ -z "$(git status --porcelain)" ]; then
-      #       echo "Code is already formatted correctly"
-      #       exit 0
-      #     fi
-      #     # Setup the git user (required to commit anything)
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      #     git config --global user.name "github-actions[bot]"
-      #     # Commit the changes made by dotnet format
-      #     git add .
-      #     git commit -m "[CI] Format C# code"
-      #     git push
+      - name: "Commit formatted C# code"
+        run: |
+          touch test.txt
+
+          # Check if there is nothing to commit (i.e. no formatting changes made)
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Code is already formatted correctly"
+            exit 0
+          fi
+          # Setup the git user (required to commit anything)
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          # Commit the changes made by dotnet format
+          git add .
+          git commit -m "[CI] Format C# code"
+          git push
