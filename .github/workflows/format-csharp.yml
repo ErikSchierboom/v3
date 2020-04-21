@@ -13,51 +13,51 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v2
 
-      - name: "Install .NET core"
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: "3.1.201"
+      # - name: "Install .NET core"
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: "3.1.201"
 
-      - name: "Install dotnet format tool"
-        run: dotnet tool install -g dotnet-format
+      # - name: "Install dotnet format tool"
+      #   run: dotnet tool install -g dotnet-format
 
       - name: "Checkout PR"
         run: |
-          cat "$GITHUB_EVENT_PATH"
+          # cat "$GITHUB_EVENT_PATH"
           git remote -v
           git branch -vv
 
-          HEAD_REF=$( \
-            jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
-            xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
-            jq -r ".head.ref")
+          PR_DATA="/tmp/pr.json"
+          jq -r ".issue.pull_request.url" "$GITHUB_EVENT_PATH" | \
+          xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -o "$PR_DATA" --url
+
+          HEAD_REF=$(jq -r ".head.ref" "$PR_DATA")
+          NUMBER=$(jq -r ".number" "$PR_DATA")
+
+          git fetch origin "pull/${NUMBER}/head:${HEAD_REF}"
 
           # Checkout the PR branch, as issue workflows have the repo's default branch checked out
-          git fetch origin "$HEAD_REF"
-          git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
-
-      - name: "Format C# code"
-        run: |
-          # Use dotnet format to format the added or modified C# files in the PR (if any)
-          jq -r '.issue.pull_request.url | . += "/files"' "$GITHUB_EVENT_PATH" | \
-            xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
-            jq -r -c '.[] | select(.status == "added" or .status == "modified") | select(.filename | match(".cs$")) | .filename' | \
-            paste -s -d, - | \
-            xargs dotnet format -f . --files
-
-      - name: "Commit formatted C# code"
-        run: |
-          # Check if there is nothing to commit (i.e. no formatting changes made)
-          if [ -z "$(git status --porcelain)" ]; then 
-            echo "Code is already formatted correctly"
-            exit 0
-          fi
-
-          # Setup the git user (required to commit anything)
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-          # Commit the changes made by dotnet format
-          git add .
-          git commit -m "[CI] Format C# code"
-          git push
+          # git fetch origin "$HEAD_REF"
+          # git checkout -b "$HEAD_REF" "origin/$HEAD_REF"
+      # - name: "Format C# code"
+      #   run: |
+      #     # Use dotnet format to format the added or modified C# files in the PR (if any)
+      #     jq -r '.issue.pull_request.url | . += "/files"' "$GITHUB_EVENT_PATH" | \
+      #       xargs curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --url | \
+      #       jq -r -c '.[] | select(.status == "added" or .status == "modified") | select(.filename | match(".cs$")) | .filename' | \
+      #       paste -s -d, - | \
+      #       xargs dotnet format -f . --files
+      # - name: "Commit formatted C# code"
+      #   run: |
+      #     # Check if there is nothing to commit (i.e. no formatting changes made)
+      #     if [ -z "$(git status --porcelain)" ]; then
+      #       echo "Code is already formatted correctly"
+      #       exit 0
+      #     fi
+      #     # Setup the git user (required to commit anything)
+      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      #     git config --global user.name "github-actions[bot]"
+      #     # Commit the changes made by dotnet format
+      #     git add .
+      #     git commit -m "[CI] Format C# code"
+      #     git push
